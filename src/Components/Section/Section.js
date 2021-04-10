@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { render } from 'react-dom';
+import { UNSPLASH_BASE_URL, UNSPLASH_COMMON_HEADERS } from '../../constants';
 
 
 
@@ -9,24 +8,53 @@ class Section extends React.Component  {
     constructor(props) {
         super(props);
         this.state = {
-            images: []}
+            images: [],
+            pages: 3,
+            orderBy: "relevant",
+
+        }
     };
 
-      
-    componentDidMount() {
-        fetch(`https://api.unsplash.com/search/photos?query=${this.props.name}&client_id=&per_page=100`)
+    getPhotosPage(pageNumber, orderBy) {
+        fetch(`${UNSPLASH_BASE_URL}/search/photos?query=${this.props.name}&per_page=30&page=${pageNumber}&order_by=${orderBy}`, {
+            headers: UNSPLASH_COMMON_HEADERS})
         .then(response => response.json())
         .then((json)=> {
-            const imgUrls = json.results.map((result)=> result.urls.full);
-            this.setState({images: imgUrls});
+            const imgUrls = json.results.map((result) => {
+                return {
+                url: result.urls.thumb,
+                totalLikes: result.likes,
+            }
+        });
+            this.setState((state, props) => ({
+                images: state.images.concat(imgUrls)
+              }));
             console.log(json);
         });
     }
 
+    orderByChange = event => {
+        this.setState({orderBy: event.target.value, images:[]});
+        this.componentDidMount();
+    }
+      
+    componentDidMount() {
+        for (let i = 1; i <= this.state.pages; i++) {
+            this.getPhotosPage(i, this.state.orderBy);
+        }
+    }
+
     render() {
-        const imageItems = this.state.images.map((src) => <img class="pic" src={src}></img>    );
+        const imageItems = this.state.images.map((img) => <img class="pic" src={img.url} alt={img.totalLikes}></img>    );
         return <div className="section-main">
             <h1>{this.props.name}</h1>
+            <div> <label for="sort by">Sort by: </label>
+            <select name="sort" id="sort" value={this.state.orderBy} onChange={this.orderByChange}>
+                <option value="relevant">Relevant</option>
+                <option value="latest">Latest</option>
+                </select>
+              </div>
+            
             <br/>
             <p>Sekcja pelny widok</p>
             {imageItems}
