@@ -24,7 +24,7 @@ class SectionPreview extends React.Component  {
     }
 
     render() {
-        const imageItems = this.state.images.map((src) => <img class="pic" src={src} alt="minature"></img>    );
+        const imageItems = this.state.images.map((src) => <img className="pic" src={src} alt="minature"></img>    );
         return <div className="section">
             <h2>{this.props.name}</h2>
             {imageItems}
