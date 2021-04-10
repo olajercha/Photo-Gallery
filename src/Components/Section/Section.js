@@ -37,11 +37,38 @@ class Section extends React.Component  {
         this.setState({orderBy: event.target.value, images:[]});
         this.componentDidMount();
     }
+
+      
+      componentWillUnmount() {
+        window.removeEventListener('scroll', this.listenToScroll)
+      }
+      
+      listenToScroll = () => {
+        const winScroll =
+          document.body.scrollTop || document.documentElement.scrollTop
+      
+        const height =
+          document.documentElement.scrollHeight -
+          document.documentElement.clientHeight;
+      
+        const scrollPosition = winScroll / height;
+      
+        console.log(scrollPosition);
+
+        if (scrollPosition >= 0.7) {
+            this.setState(  (state, props) => ({
+                pages: state.pages + 1,
+            }));
+            
+            this.getPhotosPage(this.state.pages);
+        };
+      }
       
     componentDidMount() {
         for (let i = 1; i <= this.state.pages; i++) {
             this.getPhotosPage(i, this.state.orderBy);
         }
+        window.addEventListener('scroll', this.listenToScroll);
     }
 
     render() {
